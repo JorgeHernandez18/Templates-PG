@@ -1,34 +1,60 @@
-# 📦 Plantillas Podman Compose para Proyectos de Grado
+# Templates de Podman Compose para Proyectos Web
 
-Este repositorio contiene plantillas `podman-compose.yml` para facilitar el despliegue de aplicaciones comúnmente usadas en proyectos de grado en la universidad. Las plantillas están listas para usarse y adaptarse a las necesidades de cada proyecto.
+Este repositorio contiene **ejemplos listos de `compose.yaml`** para levantar entornos de desarrollo con **Podman** (compatibles con Docker Compose).  
+Incluye configuraciones reales y comunes vistas en proyectos productivos.
+
+Stacks disponibles:
+
+- 🟢 AngularJS (servido con Nginx)  
+- 🔵 Laravel (Nginx + PHP-FPM + MySQL + Redis + Workers)  
+- 🟣 Node.js (API + PostgreSQL + Redis)  
+- 🟡 ReactJS (build de producción servido con Nginx)  
+- 🟠 Spring Boot (Java + PostgreSQL)  
 
 ---
 
-## 🧰 Requisitos Generales
+## 📦 Tecnologías y Descripción de los Templates
 
-- Tener instalado Podman y Podman Compose. (Compatible con Docker)
-- Copiar la plantilla correspondiente al lenguaje/framework de tu proyecto.
-- Asegurarte de que tu código esté en el mismo nivel del `podman-compose.yml` o configurar correctamente los volúmenes.
+### 1. AngularJS
+Un entorno para servir aplicaciones AngularJS estáticas con **Nginx** como servidor web.  
+Incluye configuración de volúmenes para mapear los archivos compilados (`dist/`) y exponerlos en el puerto `8080`.
 
 ---
-## Ejemplo de .env
-# Base DB
-POSTGRES_DB=app
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=postgres
 
-# MySQL (Laravel)
-DB_DATABASE=laravel
-DB_USERNAME=laravel
-DB_PASSWORD=secret
-DB_ROOT_PASSWORD=root
+### 2. Laravel
+Un stack clásico de **Laravel + PHP-FPM + Nginx + MySQL**.  
+La base de datos se configura con variables de entorno, y los volúmenes permiten el desarrollo sin perder datos de la DB.
 
-# Node/React
-NODE_ENV=production
-PORT=3000
+---
 
-# Spring
-SERVER_PORT=8080
-SPRING_PROFILES_ACTIVE=prod
+### 3. NodeJS
+Una aplicación backend en Node.js con soporte para hot-reload en desarrollo (gracias a `nodemon`) y configuración de puerto a través de `.env`.  
 
+---
 
+### 4. ReactJS
+Un entorno React con **Nginx** para servir la build de producción (`npm run build`).  
+Se expone en el puerto `3000` y permite mapear el directorio `build/`.
+
+---
+
+### 5. Spring Boot
+Un contenedor con una aplicación **Spring Boot + PostgreSQL**.  
+Se construye desde un `Dockerfile` que empaqueta el `.jar` y se conecta a la base de datos PostgreSQL configurada con variables en `.env`.
+
+---
+
+# 🚀 Cómo ejecutar
+
+## 1. Clonar el repositorio
+git clone https://github.com/tu-usuario/tu-repo.git
+cd tu-repo
+
+## 2. Entrar a la carpeta del proyecto (ejemplo con Laravel)
+cd laravel
+
+## 3. Crear el archivo .env
+cp .env.example .env
+
+## 4. Levantar el servicio con Podman Compose
+podman-compose up -d
