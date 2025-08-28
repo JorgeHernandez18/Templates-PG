@@ -1,0 +1,54 @@
+# compose.yaml - Spring Boot + PostgreSQL
+name: springboot-stack
+
+x-logging: &logging
+  driver: "json-file"
+  options: { max-size: "10m", max-file: "3" }
+
+x-health-pg: &health-pg
+  test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB -h localhost"]
+  interval: 10s
+  timeout: 5s
+  retries: 6
+  start_period: 20s
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./ops/spring.Dockerfile   # multi-stage: maven/gradle -> eclipse-temurin:21-jre
+    container_name: springboot-app
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-app}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      SERVER_PORT: ${SERVER_PORT:-8080}
+      JAVA_OPTS: "-XX:MaxRAMPercentage=75 -XX:+UseG1GC"
+    ports:
+      - "8083:8080"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    logging: *logging
+    networks: [ backend ]
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: springboot-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck: *health-pg
+    restart: unless-stopped
+    logging: *logging
+    networks: [ backend ]
+
+networks:
+  backend:
+
+volumes:
+  pg_data:

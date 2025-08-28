@@ -1,0 +1,80 @@
+# compose.yaml - Node.js API + Postgres + Redis
+name: nodejs-stack
+
+x-logging: &logging
+  driver: "json-file"
+  options: { max-size: "10m", max-file: "3" }
+
+x-health-pg: &health-pg
+  test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB -h localhost"]
+  interval: 10s
+  timeout: 5s
+  retries: 6
+  start_period: 20s
+
+x-health-redis: &health-redis
+  test: ["CMD", "redis-cli","ping"]
+  interval: 10s
+  timeout: 3s
+  retries: 6
+  start_period: 10s
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: ./ops/node.Dockerfile   # Node 20, pnpm/yarn/npm según tu preferencia
+      target: runtime
+    container_name: node-api
+    user: "1000:1000"
+    env_file: .env
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${PORT:-3000}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/app}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+    command: ["node","server.js"]        # o "npm","run","start"
+    ports:
+      - "3000:3000"
+    volumes:
+      - node_modules:/usr/src/app/node_modules
+      - ./:/usr/src/app
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    logging: *logging
+    networks: [ appnet ]
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: node-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck: *health-pg
+    restart: unless-stopped
+    logging: *logging
+    networks: [ appnet ]
+
+  redis:
+    image: redis:7-alpine
+    container_name: node-redis
+    command: ["redis-server","--appendonly","yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck: *health-redis
+    restart: unless-stopped
+    logging: *logging
+    networks: [ appnet ]
+
+networks:
+  appnet:
+
+volumes:
+  node_modules:
+  pg_data:
+  redis_data:

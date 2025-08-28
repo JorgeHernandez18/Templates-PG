@@ -1,0 +1,37 @@
+# compose.yaml - React build estático servido por Nginx
+name: reactjs-stack
+
+x-logging: &logging
+  driver: "json-file"
+  options: { max-size: "10m", max-file: "3" }
+
+x-health: &health
+  test: ["CMD-SHELL", "wget -qO- http://localhost/ || exit 1"]
+  interval: 10s
+  timeout: 3s
+  retries: 5
+  start_period: 10s
+
+services:
+  frontend:
+    # Multi-stage: el Dockerfile hace build (Node) y copia a Nginx
+    build:
+      context: .
+      dockerfile: ./ops/react-nginx.Dockerfile
+    container_name: react-frontend
+    ports:
+      - "8082:80"
+    environment:
+      - APP_ENV=production
+    healthcheck: *health
+    restart: unless-stopped
+    logging: *logging
+    networks: [ web ]
+
+networks:
+  web:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.enable_icc: "true"
+      com.docker.network.bridge.enable_ip_masquerade: "true"
+      com.docker.network.bridge.host_binding_ipv4: "0.0.0.0"

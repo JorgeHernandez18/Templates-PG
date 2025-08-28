@@ -11,4 +11,24 @@ Este repositorio contiene plantillas `podman-compose.yml` para facilitar el desp
 - Asegurarte de que tu código esté en el mismo nivel del `podman-compose.yml` o configurar correctamente los volúmenes.
 
 ---
+## Ejemplo de .env
+# Base DB
+POSTGRES_DB=app
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+
+# MySQL (Laravel)
+DB_DATABASE=laravel
+DB_USERNAME=laravel
+DB_PASSWORD=secret
+DB_ROOT_PASSWORD=root
+
+# Node/React
+NODE_ENV=production
+PORT=3000
+
+# Spring
+SERVER_PORT=8080
+SPRING_PROFILES_ACTIVE=prod
+
 

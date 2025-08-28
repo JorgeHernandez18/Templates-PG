@@ -7,4 +7,7 @@
 3. Ejecuta `podman-compose up -d` para iniciar el proyecto.
 
 ### Estructura de Archivos
-- `docker-compose.yml`: define los servicios para Spring Boot y base de datos (p. ej. PostgreSQL).
+- `compose.yml`: define los servicios para Spring Boot + PostgreSQL (con perfiles).
+
+## Archivos Sugeridos
+- ops/spring.Dockerfile: multi-stage con Maven/Gradle y JRE Temurin 21.

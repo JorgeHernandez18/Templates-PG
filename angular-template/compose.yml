@@ -1,0 +1,38 @@
+# compose.yaml - AngularJS (estático) servido por Nginx
+name: angularjs-stack
+
+x-default-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-nginx-healthcheck: &nginx-healthcheck
+  test: ["CMD-SHELL", "wget -qO- http://localhost/ || exit 1"]
+  interval: 10s
+  timeout: 3s
+  retries: 3
+  start_period: 10s
+
+services:
+  web:
+    image: nginx:alpine
+    container_name: angularjs-web
+    ports:
+      - "${PORT_0}:80"             #Recordar el uso de la nomenclatura "${PORT_0}:80"
+    volumes:
+      - ./dist:/usr/share/nginx/html:ro    # salida de tu build (AngularJS 1.x, gulp/grunt/webpack)
+      - ./ops/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    healthcheck: *nginx-healthcheck
+    restart: unless-stopped
+    logging: *default-logging
+    environment:
+      # útil si tu app lee variables en runtime (inyectadas vía Nginx envsubst si lo configuras)
+      - APP_ENV=production
+    networks:
+      - webnet
+
+networks:
+  webnet:
+
+volumes: {}

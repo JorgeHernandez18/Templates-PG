@@ -7,4 +7,9 @@
 3. Ejecuta `podman-compose up -d` para lanzar el proyecto Angular.
 
 ### Archivos
-- `docker-compose.yml`: configura el entorno Angular dentro de un contenedor Node.
+- `compose.yml`: configura el entorno AngularJS (estático) + Nginx.
+
+### Archivos Sugeridos
+- ops/react-nginx.Dockerfile / usar nginx.conf con SPA fallback.
+
+- Para AngularJS 1.x (proyecto legacy), el ./dist proviene de tu herramienta de build (gulp/grunt/webpack).
